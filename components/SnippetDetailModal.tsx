@@ -20,6 +20,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { DerivationBadge } from "./DerivationBadge";
+import { UsageInstructionsPanel } from "./UsageInstructionsPanel";
 import { useWallet } from "./WalletConnect";
 import { toast } from "sonner";
 import { SnippetSummary } from "@/types/type";
@@ -51,6 +52,8 @@ export interface SnippetDetail extends SnippetSummary {
   forked_from_id?: string | null;
   is_fork?: boolean;
   visibility?: "private" | "public" | "shared";
+  /** Raw `usage_instructions` column; parsed by UsageInstructionsPanel. */
+  usage_instructions?: unknown;
 }
 
 export function SnippetDetailModal({
@@ -203,7 +206,7 @@ export function SnippetDetailModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl bg-slate-900 border-purple-500/30 text-slate-100 backdrop-blur-2xl max-h-[90vh] overflow-y-auto p-6">
+      <DialogContent className="max-w-3xl w-[calc(100vw-1rem)] sm:w-full bg-slate-900 border-purple-500/30 text-slate-100 backdrop-blur-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader />
@@ -291,7 +294,17 @@ export function SnippetDetailModal({
             )}
 
 
+            {/* Usage Instructions: author documentation, distinct from the code below */}
+            <UsageInstructionsPanel
+              snippetId={snippet.id}
+              usage={snippet.usage_instructions}
+              isOwner={isOwner}
+              token={wallet?.token}
+              onChange={(usage_instructions) => setSnippet({ ...snippet, usage_instructions })}
+            />
+
             {/* Code Block with Header Actions */}
+            <h3 className="text-sm font-semibold text-slate-300 -mb-4">Source code</h3>
             <div className="rounded-xl border border-purple-500/20 bg-slate-950 overflow-hidden shadow-inner">
               <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 border-b border-purple-500/20 text-xs text-slate-400">
                 <span className="font-mono">{snippet.language}</span>
@@ -333,6 +346,7 @@ export function SnippetDetailModal({
             )}
 
             {/* Metadata Footer Info */}
+            <h3 className="sr-only">Details</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-400 border-t border-purple-500/20 pt-4">
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-slate-500" />

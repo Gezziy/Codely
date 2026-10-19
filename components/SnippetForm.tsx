@@ -23,6 +23,7 @@ import { snippetSchema } from "@/validiation/snippet-form-validiation";
 import { toast } from "sonner";
 import { useSnippetFormatting } from "@/hooks/useSnippetFormatting";
 import SnippetEditorToolbar from "@/components/SnippetEditorToolbar";
+import { UsageInstructionsFormSection } from "@/components/UsageInstructionsPanel";
 import { useWallet } from "@/wallet/context/WalletContext";
 import { signMessage } from "@/wallet/lib/walletAdapters";
 
@@ -649,6 +650,21 @@ export default function SnippetForm({
           </Button>
         </div>
       </form>
+
+      {/* Usage instructions save on their own, outside the snippet form:
+          nested forms are invalid HTML, and a separate save keeps them out of
+          the form's autosave and conflict detection. New snippets need an id
+          first, so the section appears once the snippet exists. */}
+      {editingId ? (
+        <div className="mt-6">
+          <UsageInstructionsFormSection snippetId={editingId} token={wallet?.token} />
+        </div>
+      ) : (
+        <p className="mt-6 text-xs text-slate-400">
+          You can add usage instructions (setup steps, prerequisites, input and output examples) once
+          the snippet is saved.
+        </p>
+      )}
     </Card>
   );
 }
