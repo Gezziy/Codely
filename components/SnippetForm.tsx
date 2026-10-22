@@ -64,8 +64,6 @@ export default function SnippetForm({
     getValues,
     setValue,
     watch,
-    watch,
-    getValues,
     formState: { errors },
   } = useForm<SnippetFormValues>({
     resolver: zodResolver(snippetSchema),
@@ -170,6 +168,11 @@ export default function SnippetForm({
 
   // Watch all form fields to trigger autosave
   const watchedValues = watch();
+  // `watch()` returns a new object on every render, so the autosave effect keys
+  // on the serialised values instead: a re-render that changes nothing (e.g.
+  // the "Autosave failed" status appearing) must not schedule a second save
+  // alongside the pending retry.
+  const watchedSnapshot = buildSnapshot(watchedValues);
 
   const buildPayload = (values: SnippetFormValues) => ({
     title: values.title,
@@ -285,7 +288,7 @@ export default function SnippetForm({
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
-  }, [watchedValues, editingId]);
+  }, [watchedSnapshot, editingId]);
 
   // Cleanup timers on unmount
   useEffect(() => {
